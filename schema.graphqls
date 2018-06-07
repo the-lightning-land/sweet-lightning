@@ -1,0 +1,40 @@
+type Query {
+  info: Info!
+  invoice(r_hash: String!): Invoice
+}
+
+type Info {
+  identity_pubkey: String!
+  alias: String
+}
+
+type Subscription {
+  invoicePaid(r_hash: String!): Invoice!
+  invoicesPaid: Invoice!
+}
+
+type Mutation {
+  addInvoice(amount: Int!): Invoice!
+}
+
+type Invoice {
+  memo: String
+  receipt: String
+  r_preimage: String
+  r_hash: String
+  value: Int
+  settled: Boolean
+  creation_date: String
+  settle_date: String
+  payment_request: String!
+  description_hash: String
+  expiry: Int
+  fallback_addr: String
+  cltv_expiry: Int
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

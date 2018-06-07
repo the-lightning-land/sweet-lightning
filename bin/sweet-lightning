@@ -1,0 +1,149 @@
+#!/usr/bin/env node
+
+const program = require('commander')
+const fs = require('fs')
+const path = require('path')
+const { parse } = require('url')
+const next = require('next')
+const express = require('express')
+const { SubscriptionServer } = require('subscriptions-transport-ws')
+const { makeExecutableSchema } = require('graphql-tools')
+const expressPlayground = require('graphql-playground-middleware-express').default
+const { graphqlExpress } = require('apollo-server-express')
+const { execute, subscribe } = require('graphql')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const grpc = require('grpc')
+const { PubSub } = require('graphql-subscriptions')
+const { DefinePlugin, IgnorePlugin } = require('webpack')
+const createResolvers = require('../api/resolvers')
+const { createServer, isSecure } = require('../lib/create-server')
+
+program
+  .version('1.0.0', '-v, --version')
+  .description('Buy candy with Bitcoin Lightning')
+  .option('--lnd.adminmacaroonpath [path]', 'Path to admin macaroon', '/root/.lnd/admin.macaroon')
+  .option('--lnd.rpccert [path]', 'Path to TLS certificate for lnd\'s RPC services', '/root/.lnd/tls.cert')
+  .option('--lnd.rpcserver [server]', 'Interface/port to lnd\'s RPC services', 'localhost:10009')
+  .option('--tls.certpath [path]', 'Path to TLS certificate')
+  .option('--tls.keypath [path]', 'Path to TLS key')
+  .option('--listen [server]', 'Interface/port to the web app', 'localhost:3000')
+  .option('--externalurl [url]', 'External url to the web app', 'http://localhost:3000')
+  .parse(process.argv)
+
+const lndMacaroon = fs.readFileSync(program['lnd.adminmacaroonpath']).toString('hex')
+
+const lndCert = fs.readFileSync(program['lnd.rpccert'])
+const credentials = grpc.credentials.createSsl(lndCert)
+
+const { lnrpc } = grpc.load('lnd.proto')
+const lightning = new lnrpc.Lightning(program['lnd.rpcserver'], credentials)
+
+const [
+  listenHost = 'localhost',
+  listenPort = 3000,
+] = program['listen'].split(':') || []
+
+const {
+  protocol: externalProtocol = 'http:',
+  hostname: externalHost = 'localhost',
+  port: externalPort = 3000,
+  pathname: externalPath = '/',
+} = program['externalurl'] ? new URL(program['externalurl']) : {}
+
+const externalWsProtocol = externalProtocol.replace('http', 'ws')
+const basePath = externalPath !== '/' ? externalPath : ''
+
+// needed for handshake with lnd grpc server
+process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-ECDSA-AES128-GCM-SHA256'
+
+const dev = process.env.NODE_ENV !== 'production'
+const nextDir = path.join(__dirname, '..')
+const app = next({
+  dev,
+  dir: nextDir,
+  conf: {
+    assetPrefix: `${basePath}/`,
+    serverRuntimeConfig: {
+      graphqlUri: `http://localhost:${listenPort}/graphql`, // TODO: secure protocol
+    },
+    publicRuntimeConfig: {
+      basePath,
+      graphqlUri: `${externalProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+      subscriptionUri: `${externalWsProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+    },
+  },
+})
+const handle = app.getRequestHandler()
+
+const pubsub = new PubSub()
+
+const meta = new grpc.Metadata();
+meta.add('macaroon', lndMacaroon);
+
+const call = lightning.subscribeInvoices({}, meta);
+
+call
+  .on('data', (invoice) => {
+    pubsub.publish('invoicePaid', ({
+      invoice,
+    }))
+  })
+  .on('status', (status) => {
+    console.info(`Current status ${status}`);
+  })
+
+const typeDefsPath = path.join(nextDir, 'schema.graphqls')
+const typeDefs = fs.readFileSync(typeDefsPath, 'utf8')
+
+app.prepare().then(() => {
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers: createResolvers({ pubsub, lightning }),
+  })
+
+  const app = express()
+
+  app.use(cors())
+
+  app.use('/graphql', bodyParser.json(), graphqlExpress({
+    schema,
+    context: {
+      macaroon: lndMacaroon,
+    },
+  }))
+
+  app.use('/playground', expressPlayground({
+    endpoint: `${externalProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+    subscriptionEndpoint: `${externalWsProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+  }))
+
+  app.get('*', (req, res) => {
+    return handle(req, res)
+  })
+
+  const server = createServer(app, {
+    certPath: program['tls.certpath'],
+    keyPath: program['tls.keypath'],
+  })
+
+  server.listen(listenPort, listenHost, (err) => {
+    if (err) throw err
+
+    const proto = {
+      http: isSecure(server) ? 'https' : 'http',
+      ws: isSecure(server) ? 'wss' : 'ws',
+    };
+
+    console.info(`Next server listening on ${proto.http}://${listenHost}:${listenPort}`)
+    console.info(`GraphQL server listening on ${proto.http}://${listenHost}:${listenPort}/graphql`)
+    console.info(`Subscriptions listening on ${proto.ws}://${listenHost}:${listenPort}/graphql`)
+    console.info(`External URL is ${externalProtocol}//${externalHost}:${externalPort}`)
+    console.info(`Test API with ${externalProtocol}//${externalHost}:${externalPort}/playground`)
+
+    new SubscriptionServer({ execute, subscribe, schema }, {
+      server,
+      path: `${basePath}/graphql`,
+    })
+  })
+})
