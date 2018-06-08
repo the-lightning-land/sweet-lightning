@@ -90,10 +90,31 @@ class IndexPage extends Component {
   }
 
   render() {
+    const { publicRuntimeConfig } = getConfig()
+
     return (
       <div className="section">
         <Head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="initial-scale=1.0, width=device-width, maximum-scale=1.0, user-scalable=no" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="format-detection" content="telephone=no" />
+          <meta name="apple-mobile-web-app-title" content="Sweet ⚡️" />
           <title>Lightning Candy Dispenser</title>
+          <meta name="description" content="Pay for your candy with Bitcoin over Lightning" />
+          <meta name="MobileOptimized" content="320" />
+          <meta name="theme-color" content="#ffffff" />
+          <link rel="icon" href={`${publicRuntimeConfig.basePath}/static/favicon.ico`} type="image/x-icon" />
+          <meta name="twitter:title" content="Lightning Candy Dispenser" />
+          <meta name="twitter:description" content="Pay for your candy with Bitcoin over Lightning" />
+          {/* <meta name="twitter:image" content={imageUrl} /> */}
+          {/* <meta name="twitter:card" content="summary_large_image" /> */}
+          <meta name="twitter:card" content="summary" />
+          <meta property="og:title" content="Lightning Candy Dispenser" />
+          <meta property="og:description" content="Pay for your candy with Bitcoin over Lightning" />
+          {/* <meta name="og:image" content={imageUrl} /> */}
         </Head>
         {/* Generate invoice */}
         {!this.props.data?.invoice ? (
