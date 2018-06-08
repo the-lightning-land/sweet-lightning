@@ -82,8 +82,11 @@ class IndexPage extends Component {
     })
 
     const { publicRuntimeConfig } = getConfig()
-    const href = `${publicRuntimeConfig.basePath}/?rHash=${data.addInvoice.r_hash}`
-    Router.push(href, href, { shallow: false })
+    Router.push(
+      `/index?rHash=${data.addInvoice.r_hash}`,
+      `${publicRuntimeConfig.basePath}/?rHash=${data.addInvoice.r_hash}`,
+      { shallow: false },
+    )
   }
 
   render() {
