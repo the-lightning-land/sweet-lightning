@@ -52,6 +52,7 @@ const {
 } = program['externalurl'] ? new URL(program['externalurl']) : {}
 
 const externalWsProtocol = externalProtocol.replace('http', 'ws')
+const externalPortWithColon = externalPort ? `:${externalPort}` : ''
 const basePath = externalPath !== '/' ? externalPath : ''
 
 // needed for handshake with lnd grpc server
@@ -69,8 +70,8 @@ const app = next({
     },
     publicRuntimeConfig: {
       basePath,
-      graphqlUri: `${externalProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
-      subscriptionUri: `${externalWsProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+      graphqlUri: `${externalProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
+      subscriptionUri: `${externalWsProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
     },
   },
 })
@@ -114,8 +115,8 @@ app.prepare().then(() => {
   }))
 
   app.use('/playground', expressPlayground({
-    endpoint: `${externalProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
-    subscriptionEndpoint: `${externalWsProtocol}//${externalHost}:${externalPort}${basePath}/graphql`,
+    endpoint: `${externalProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
+    subscriptionEndpoint: `${externalWsProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
   }))
 
   app.get('*', (req, res) => {
@@ -138,12 +139,12 @@ app.prepare().then(() => {
     console.info(`Next server listening on ${proto.http}://${listenHost}:${listenPort}`)
     console.info(`GraphQL server listening on ${proto.http}://${listenHost}:${listenPort}/graphql`)
     console.info(`Subscriptions listening on ${proto.ws}://${listenHost}:${listenPort}/graphql`)
-    console.info(`External URL is ${externalProtocol}//${externalHost}:${externalPort}`)
-    console.info(`Test API with ${externalProtocol}//${externalHost}:${externalPort}/playground`)
+    console.info(`External URL is ${externalProtocol}//${externalHost}${externalPortWithColon}`)
+    console.info(`Test API with ${externalProtocol}//${externalHost}${externalPortWithColon}/playground`)
 
     new SubscriptionServer({ execute, subscribe, schema }, {
       server,
-      path: `${basePath}/graphql`,
+      path: '/graphql',
     })
   })
 })
