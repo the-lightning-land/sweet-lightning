@@ -42,7 +42,7 @@ module.exports = ({ pubsub, lightning }) => ({
     },
     invoicesPaid: {
       resolve: (payload) => mapInvoice(payload.invoice),
-      subscribe: pubsub.asyncIterator('invoicePaid'),
+      subscribe: () => pubsub.asyncIterator('invoicePaid'),
     },
   },
   Mutation: {
