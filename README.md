@@ -2,7 +2,12 @@
 
 > ⚡️ Pay for your candy with Bitcoin over Lightning
 
-Try it on [the.lightning.land/candy](https://the.lightning.land/candy).
+Try it on:
+
+* [the.lightning.land/candy](https://the.lightning.land/candy).
+* [the.testnet.lightning.land/candy](https://the.testnet.lightning.land/candy).
+
+![Sweet Lightning Demo](https://user-images.githubusercontent.com/198988/41189385-58fe4d7e-6bcd-11e8-9461-cf4ad5d4625f.gif)
 
 ## Run it locally
 
