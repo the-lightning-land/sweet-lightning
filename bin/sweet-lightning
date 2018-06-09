@@ -93,6 +93,9 @@ call
   .on('status', (status) => {
     console.info(`Current status ${status}`);
   })
+  .on('end', () => {
+    console.info(`End of stream`);
+  })
 
 const typeDefsPath = path.join(nextDir, 'schema.graphqls')
 const typeDefs = fs.readFileSync(typeDefsPath, 'utf8')
@@ -147,4 +150,8 @@ app.prepare().then(() => {
       path: '/graphql',
     })
   })
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', reason.stack || reason)
 })
