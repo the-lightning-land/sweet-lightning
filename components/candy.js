@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Candy = ({ size }) => (
-  <svg width="362" height="210" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+  <svg viewBox="0 0 362 210" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
     <defs>
       <radialGradient cx="35.587%" fx="35.587%" fy="50%" r="87.428%" gradientTransform="matrix(0 1 -.54034 0 .626 .144)" id="b">
         <stop stopColor="#E7FFA7" offset="0%"/>
@@ -287,6 +287,10 @@ const Candy = ({ size }) => (
       </g>
     </g>
     <style jsx>{`
+      svg {
+        max-width: 340px;
+      }
+
       .hide {
         visibility: hidden;
         opacity: 0;

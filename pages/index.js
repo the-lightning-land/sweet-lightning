@@ -8,6 +8,8 @@ import getConfig from 'next/config'
 import withData from '../with/data'
 import Candy from '../components/candy'
 import Check from '../components/check'
+import Button from '../components/button'
+import Return from '../components/return'
 
 const min = (value, min) => value < min ? min : value
 const max = (value, max) => value > max ? max : value
@@ -85,7 +87,14 @@ class IndexPage extends Component {
     Router.push(
       `/index?rHash=${data.addInvoice.r_hash}`,
       `${publicRuntimeConfig.basePath}/?rHash=${data.addInvoice.r_hash}`,
-      { shallow: false },
+    )
+  }
+
+  onReturn = () => {
+    const { publicRuntimeConfig } = getConfig()
+    Router.push(
+      `/index`,
+      `${publicRuntimeConfig.basePath}/`,
     )
   }
 
@@ -160,7 +169,7 @@ class IndexPage extends Component {
         ) : null}
         {!this.props.data?.invoice ? (
           <div className="action">
-            <button className="buy" onClick={this.onCreateInvoice}>Pay with Bitcoin ⚡️</button>
+            <Button onClick={this.onCreateInvoice}>Pay with Bitcoin ⚡️</Button>
           </div>
         ) : null}
         {/* Invoice */}
@@ -176,18 +185,19 @@ class IndexPage extends Component {
         ) : null}
         {this.props.data?.invoice && !this.props.data.invoice.settled ? (
           <div className="qr">
-            <div className="code">
+            <a className="code" href={`lightning:${this.props.data.invoice.payment_request}`}>
               <QRCode
                 style={{ width: '100%', height: '100%' }}
                 size={256}
                 renderAs="svg"
                 value={this.props.data.invoice.payment_request}
               />
-            </div>
+            </a>
           </div>
         ) : null}
         {this.props.data?.invoice && !this.props.data.invoice.settled ? (
           <div className="payreq">
+            <div className="invoice">Your invoice ⚡️</div>
             <pre>
               <code>
                 {this.props.data.invoice.payment_request}
@@ -198,7 +208,7 @@ class IndexPage extends Component {
         {/* Successfully paid */}
         {this.props.data?.invoice && this.props.data.invoice.settled ? (
           <div className="title">
-            Paid!
+            Thank you!
           </div>
         ) : null}
         {this.props.data?.invoice && this.props.data.invoice.settled ? (
@@ -208,6 +218,21 @@ class IndexPage extends Component {
         ) : null}
         {this.props.data?.invoice && this.props.data.invoice.settled ? (
           <Check />
+        ) : null}
+        {this.props.data?.invoice && this.props.data.invoice.settled ? (
+          <div className="action">
+            <Return seconds={5} onReturn={this.onReturn}>
+              {(secondsLeft) => (
+                <Button secondary onClick={this.onReturn}>
+                  {secondsLeft > 0 ? (
+                    <span>Back to start in {secondsLeft}s</span>
+                  ) : (
+                    <span>Back to start...</span>
+                  )}
+                </Button>
+              )}
+            </Return>
+          </div>
         ) : null}
         <div className="footer">
           <a href="https://the.lightning.land">the.lightning.land</a>
@@ -267,7 +292,7 @@ class IndexPage extends Component {
           }
 
           .less:disabled, .more:disabled {
-            color: gray;
+            color: #666;
             cursor: not-allowed;
           }
 
@@ -304,22 +329,6 @@ class IndexPage extends Component {
             text-align: center;
           }
 
-          .buy {
-            border: none;
-            font: inherit;
-            display: inline-block;
-            margin: 0;
-            padding: 15px;
-            background: green;
-            width: 100%;
-            color: white;
-            height: 70px;
-            border-radius: 6px;
-            font-size: 28px;
-            font-weight: 100;
-            max-width: 350px;
-          }
-
           .footer {
             text-align: center;
             padding-top: 20px;
@@ -340,22 +349,35 @@ class IndexPage extends Component {
             height: auto;
             padding: 25px;
             box-shadow: 0 0 40px rgba(0,0,0,0.3);
+            transition: box-shadow .3s ease;
+          }
+
+          .code:hover {
+            box-shadow: 0 0 60px rgba(0,0,0,0.3);
           }
 
           .payreq {
             padding-top: 20px;
           }
 
+          .invoice {
+            margin: 0 auto;
+            max-width: 350px;
+            padding: 15px;
+            color: #666;
+            text-align: center;
+          }
+
           pre {
-            font-size: 24px;
+            font-size: 20px;
             word-wrap: break-word;
             white-space: normal;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 25px;
             cursor: copy;
             transition: background .3s ease;
             margin: 0 auto;
             max-width: 350px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.3);
           }
         `}</style>
       </div>
