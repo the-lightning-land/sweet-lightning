@@ -91,6 +91,10 @@ class IndexPage extends Component {
   }
 
   onReturn = () => {
+    this.setState({
+      size: 4,
+    })
+
     const { publicRuntimeConfig } = getConfig()
     Router.push(
       `/index`,
