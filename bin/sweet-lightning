@@ -82,20 +82,18 @@ const pubsub = new PubSub()
 const meta = new grpc.Metadata();
 meta.add('macaroon', lndMacaroon);
 
-const call = lightning.subscribeInvoices({}, meta);
+function subscribeToInvoices() {
+  let call = lightning.subscribeInvoices({}, meta);
+  call
+    .on('data', (invoice) => pubsub.publish('invoicePaid', ({ invoice })))
+    .on('error', (err) => {
+      console.error(`Subscription failed`, err.message)
+      console.info(`Subscribing again in 5s`)
+      setTimeout(() => subscribeToInvoices(), 5000)
+    })
+}
 
-call
-  .on('data', (invoice) => {
-    pubsub.publish('invoicePaid', ({
-      invoice,
-    }))
-  })
-  .on('status', (status) => {
-    console.info(`Current status ${status}`);
-  })
-  .on('end', () => {
-    console.info(`End of stream`);
-  })
+subscribeToInvoices()
 
 const typeDefsPath = path.join(nextDir, 'schema.graphqls')
 const typeDefs = fs.readFileSync(typeDefsPath, 'utf8')
