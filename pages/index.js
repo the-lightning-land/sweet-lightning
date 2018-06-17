@@ -252,8 +252,14 @@ class IndexPage extends Component {
             box-shadow: 0 0 99px rgba(0,0,0,0.3);
             padding: 15px;
             border-radius: 6px;
-            margin: 100px auto;
+            margin: 0 auto;
             max-width: 480px;
+          }
+
+          @media (min-width: 768px) {
+            .section {
+              margin: 100px auto;
+            }
           }
 
           .title {
@@ -349,7 +355,8 @@ class IndexPage extends Component {
 
           .code {
             display: inline-block;
-            width: 350px;
+            width: 100%;
+            max-width: 350px;
             height: auto;
             padding: 25px;
             box-shadow: 0 0 40px rgba(0,0,0,0.3);
