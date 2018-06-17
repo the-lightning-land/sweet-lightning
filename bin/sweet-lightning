@@ -86,6 +86,11 @@ function subscribeToInvoices() {
   let call = lightning.subscribeInvoices({}, meta);
   call
     .on('data', (invoice) => pubsub.publish('invoicePaid', ({ invoice })))
+    .on('end', () => {
+      console.info(`Subscription closed`)
+      console.info(`Subscribing again in 5s`)
+      setTimeout(() => subscribeToInvoices(), 5000)
+    })
     .on('error', (err) => {
       console.error(`Subscription failed`, err.message)
       console.info(`Subscribing again in 5s`)
