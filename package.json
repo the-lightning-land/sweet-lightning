@@ -37,6 +37,7 @@
     "prop-types": "^15.6.1",
     "qrcode.react": "^0.8.0",
     "react": "^16.3.2",
+    "react-animate-height": "^2.0.1",
     "react-apollo": "^2.1.4",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.3.2",

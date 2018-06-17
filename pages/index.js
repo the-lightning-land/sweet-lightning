@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Head from 'next/head'
+import AnimateHeight from 'react-animate-height'
 import { graphql, compose, withApollo } from 'react-apollo'
 import gql from 'graphql-tag'
 import Router from 'next/router'
@@ -102,6 +103,14 @@ class IndexPage extends Component {
     )
   }
 
+  onBack = () => {
+    const { publicRuntimeConfig } = getConfig()
+    Router.push(
+      `/index`,
+      `${publicRuntimeConfig.basePath}/`,
+    )
+  }
+
   render() {
     const { publicRuntimeConfig } = getConfig()
 
@@ -129,23 +138,53 @@ class IndexPage extends Component {
           <meta property="og:description" content="Pay for your candy with Bitcoin over Lightning" />
           {/* <meta name="og:image" content={imageUrl} /> */}
         </Head>
-        {/* Generate invoice */}
-        {!this.props.data?.invoice ? (
+
+        {/* Title */}
+        <AnimateHeight animateOpacity height={!this.props.data?.invoice ? 'auto' : 0}>
           <div className="title">
             Candy Dispenser
           </div>
-        ) : null}
-        {!this.props.data?.invoice ? (
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && !this.props.data.invoice.settled ? 'auto' : 0}>
+          <div className="title">
+            <button onClick={this.onBack} className="back">
+              <svg viewBox="0 0 100 135">
+                <path stroke="currentColor" strokeWidth="10" d="M81 130L20 67.5 81 5" fill="none" fillRule="evenodd" />
+              </svg>
+            </button>
+            Your invoice
+          </div>
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && this.props.data.invoice.settled ? 'auto' : 0}>
+          <div className="title">
+            Thank you!
+          </div>
+        </AnimateHeight>
+
+        {/* Lead Text */}
+        <AnimateHeight animateOpacity height={!this.props.data?.invoice ? 'auto' : 0}>
           <div className="description">
             Please choose the amount of candy that you'd like to buy.
           </div>
-        ) : null}
-        {!this.props.data?.invoice ? (
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && !this.props.data.invoice.settled ? 'auto' : 0}>
+          <div className="description">
+            Please use the invoice below in order to dispense your candy.
+          </div>
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && this.props.data.invoice.settled ? 'auto' : 0}>
+          <div className="description">
+            Your candy is on the way.
+          </div>
+        </AnimateHeight>
+
+        {/* Generate invoice */}
+        <AnimateHeight animateOpacity height={!this.props.data?.invoice ? 'auto' : 0}>
           <div className="candy">
             <Candy size={this.state.size} />
           </div>
-        ) : null}
-        {!this.props.data?.invoice ? (
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={!this.props.data?.invoice ? 'auto' : 0}>
           <div className="amount">
             <button className="less" onClick={this.onLess} disabled={this.state.size <= 1}>
               <svg viewBox="0 0 96 96">
@@ -170,62 +209,47 @@ class IndexPage extends Component {
               <span>More candy</span>
             </button>
           </div>
-        ) : null}
-        {!this.props.data?.invoice ? (
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={!this.props.data?.invoice ? 'auto' : 0}>
           <div className="action">
             <Button onClick={this.onCreateInvoice}>Pay with Bitcoin ⚡️</Button>
           </div>
-        ) : null}
+        </AnimateHeight>
+
         {/* Invoice */}
-        {this.props.data?.invoice && !this.props.data.invoice.settled ? (
-          <div className="title">
-            Your invoice
-          </div>
-        ) : null}
-        {this.props.data?.invoice && !this.props.data.invoice.settled ? (
-          <div className="description">
-            Please use the invoice below in order to dispense your candy.
-          </div>
-        ) : null}
-        {this.props.data?.invoice && !this.props.data.invoice.settled ? (
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && !this.props.data.invoice.settled ? 'auto' : 0}>
           <div className="qr">
-            <a className="code" href={`lightning:${this.props.data.invoice.payment_request}`}>
+            <a className="code" href={`lightning:${this.props.data?.invoice?.payment_request}`}>
               <QRCode
                 style={{ width: '100%', height: '100%' }}
                 size={256}
                 renderAs="svg"
-                value={this.props.data.invoice.payment_request}
+                value={this.props.data?.invoice?.payment_request || ''}
               />
             </a>
           </div>
-        ) : null}
-        {this.props.data?.invoice && !this.props.data.invoice.settled ? (
+        </AnimateHeight>
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && !this.props.data.invoice.settled ? 'auto' : 0}>
           <div className="payreq">
             <div className="invoice">Your invoice ⚡️</div>
             <pre>
               <code>
-                {this.props.data.invoice.payment_request}
+                {this.props.data?.invoice?.payment_request}
               </code>
             </pre>
           </div>
-        ) : null}
+        </AnimateHeight>
+
         {/* Successfully paid */}
-        {this.props.data?.invoice && this.props.data.invoice.settled ? (
-          <div className="title">
-            Thank you!
-          </div>
-        ) : null}
-        {this.props.data?.invoice && this.props.data.invoice.settled ? (
-          <div className="description">
-            Your candy is on the way.
-          </div>
-        ) : null}
-        {this.props.data?.invoice && this.props.data.invoice.settled ? (
+        <AnimateHeight animateOpacity height={this.props.data?.invoice && this.props.data.invoice.settled ? 'auto' : 0}>
           <Check />
-        ) : null}
-        {this.props.data?.invoice && this.props.data.invoice.settled ? (
+        </AnimateHeight>
+        <AnimateHeight height={this.props.data?.invoice && this.props.data.invoice.settled ? 'auto' : 0}>
           <div className="action">
-            <Return seconds={5} onReturn={this.onReturn}>
+            <Return
+              seconds={this.props.data?.invoice && this.props.data.invoice.settled ? 5 : null}
+              onReturn={this.onReturn}
+            >
               {(secondsLeft) => (
                 <Button secondary onClick={this.onReturn}>
                   {secondsLeft > 0 ? (
@@ -237,10 +261,13 @@ class IndexPage extends Component {
               )}
             </Return>
           </div>
-        ) : null}
+        </AnimateHeight>
+
+        {/* Footer */}
         <div className="footer">
           <a href="https://the.lightning.land">the.lightning.land</a>
         </div>
+
         <style jsx>{`
           * {
             box-sizing: border-box;
@@ -263,10 +290,32 @@ class IndexPage extends Component {
           }
 
           .title {
+            position: relative;
             font-size: 34px;
             font-weight: 100;
             text-align: center;
             padding-top: 20px;
+          }
+
+          .back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            background: transparent;
+            border: none;
+            font: inherit;
+            margin: 0;
+            height: 100%;
+            padding: 20px 10px 0;
+            color: #333;
+            cursor: pointer;
+          }
+
+          .back svg {
+            display: block;
+            height: 100%;
+            width: auto;
           }
 
           .description {

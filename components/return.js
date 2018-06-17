@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 
 export default class Return extends Component {
-  seconds = null
   timeout = null
 
   constructor(props) {
@@ -12,14 +11,36 @@ export default class Return extends Component {
   }
 
   componentDidMount() {
-    this.timeout = setTimeout(() => this.tick(), 1000)
+    if (this.props.seconds !== null) {
+      this.timeout = setTimeout(() => this.tick(), 1000)
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.timeout) {
+      clearTimeout(this.timeout)
+    }
+
+    if (prevProps.seconds !== this.props.seconds) {
+      this.setState({
+        seconds: this.props.seconds,
+      })
+    }
+
+    if (this.props.seconds !== null) {
+      this.timeout = setTimeout(() => this.tick(), 1000)
+    }
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timeout)
+    if (this.timeout) {
+      clearTimeout(this.timeout)
+    }
   }
 
   tick() {
+    console.log('tick')
+
     if (this.state.seconds > 0) {
       this.setState({
         seconds: this.state.seconds - 1,
