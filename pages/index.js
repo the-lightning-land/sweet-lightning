@@ -265,7 +265,7 @@ class IndexPage extends Component {
 
         {/* Footer */}
         <div className="footer">
-          <a href="https://the.lightning.land">the.lightning.land</a>
+          <a href={publicRuntimeConfig.footerUrl}>{publicRuntimeConfig.footer}</a>
         </div>
 
         <style jsx>{`

@@ -29,6 +29,8 @@ program
   .option('--tls.keypath [path]', 'Path to TLS key')
   .option('--listen [server]', 'Interface/port to the web app', 'localhost:3000')
   .option('--externalurl [url]', 'External url to the web app', 'http://localhost:3000')
+  .option('--footer [text]', 'Footer text', 'the.lightning.land')
+  .option('--footer.url [url]', 'Footer url', 'https://the.lightning.land')
   .parse(process.argv)
 
 const lndMacaroon = fs.readFileSync(program['lnd.adminmacaroonpath']).toString('hex')
@@ -72,6 +74,8 @@ const app = next({
       basePath,
       graphqlUri: `${externalProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
       subscriptionUri: `${externalWsProtocol}//${externalHost}${externalPortWithColon}${basePath}/graphql`,
+      footer: program['footer'],
+      footerUrl: program['footer.url'],
     },
   },
 })
