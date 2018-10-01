@@ -22,20 +22,37 @@ const { createServer, isSecure } = require('../lib/create-server')
 program
   .version('1.0.0', '-v, --version')
   .description('Buy candy with Bitcoin Lightning')
-  .option('--lnd.adminmacaroonpath [path]', 'Path to admin macaroon', '/root/.lnd/admin.macaroon')
-  .option('--lnd.rpccert [path]', 'Path to TLS certificate for lnd\'s RPC services', '/root/.lnd/tls.cert')
-  .option('--lnd.rpcserver [server]', 'Interface/port to lnd\'s RPC services', 'localhost:10009')
-  .option('--tls.certpath [path]', 'Path to TLS certificate')
-  .option('--tls.keypath [path]', 'Path to TLS key')
-  .option('--listen [server]', 'Interface/port to the web app', 'localhost:3000')
-  .option('--externalurl [url]', 'External url to the web app', 'http://localhost:3000')
-  .option('--footer [text]', 'Footer text', 'the.lightning.land')
-  .option('--footer.url [url]', 'Footer url', 'https://the.lightning.land')
+  .option('--lnd.macaroon [base64|path]', 'Base64 encoded string or path to macaroon', process.env.LND_MACAROON || '/root/.lnd/invoice.macaroon')
+  .option('--lnd.rpccert [base64|path]', 'Base64 encoded string or path to TLS certificate for lnd\'s RPC services', process.env.LND_RPC_CERT || '/root/.lnd/tls.cert')
+  .option('--lnd.rpcserver [server]', 'Interface/port to lnd\'s RPC services', process.env.LND_RPC_SERVER || 'localhost:10009')
+  .option('--tls.certpath [path]', process.env.TLS_CERT_PATH || 'Path to TLS certificate')
+  .option('--tls.keypath [path]', process.env.TLS_KEY_PATH || 'Path to TLS key')
+  .option('--listen [server]', 'Interface/port to the web app', process.env.LISTEN || 'localhost:3000')
+  .option('--externalurl [url]', 'External url to the web app', process.env.EXTERNAL_URL || 'http://localhost:3000')
+  .option('--footer [text]', 'Footer text', process.env.FOOTER || 'the.lightning.land')
+  .option('--footer.url [url]', 'Footer url', process.env.FOOTER_URL || 'https://the.lightning.land')
   .parse(process.argv)
 
-const lndMacaroon = fs.readFileSync(program['lnd.adminmacaroonpath']).toString('hex')
+let lndMacaroon
 
-const lndCert = fs.readFileSync(program['lnd.rpccert'])
+try {
+  // try to get macaroon from path
+  lndMacaroon = fs.readFileSync(program['lnd.macaroon']).toString('hex')
+} catch (err) {
+  // it's probably a base64 encoded string then
+  lndMacaroon = Buffer.from(program['lnd.macaroon'], 'base64').toString('hex')
+}
+
+let lndCert
+
+try {
+  // try to get certificate from path
+  lndCert = fs.readFileSync(program['lnd.rpccert'])
+} catch (err) {
+  // it's probably a base64 encoded string then
+  lndCert = Buffer.from(program['lnd.rpccert'], 'base64')
+}
+
 const credentials = grpc.credentials.createSsl(lndCert)
 
 const { lnrpc } = grpc.load('lnd.proto')
