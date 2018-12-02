@@ -31,6 +31,7 @@ program
   .option('--externalurl [url]', 'External url to the web app', process.env.EXTERNAL_URL || 'http://localhost:3000')
   .option('--footer [text]', 'Footer text', process.env.FOOTER || 'the.lightning.land')
   .option('--footer.url [url]', 'Footer url', process.env.FOOTER_URL || 'https://the.lightning.land')
+  .option('--memo.template [text]', 'Template of invoice memo. Use the placeholder $amt for the amount in satoshis.', process.env.MEMO_TEMPLATE || 'Candy for $amt sat')
   .parse(process.argv)
 
 let lndMacaroon
@@ -123,6 +124,10 @@ subscribeToInvoices()
 
 const typeDefsPath = path.join(nextDir, 'schema.graphqls')
 const typeDefs = fs.readFileSync(typeDefsPath, 'utf8')
+const createMemo = (amount) => {
+  const memoTemplate = program['memo.template'];
+  return memoTemplate.replace(/\$amt/g, `${amount}`);
+};
 
 app.prepare().then(() => {
   const schema = makeExecutableSchema({
@@ -138,6 +143,7 @@ app.prepare().then(() => {
     schema,
     context: {
       macaroon: lndMacaroon,
+      createMemo,
     },
   }))
 

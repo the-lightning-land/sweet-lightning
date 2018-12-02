@@ -46,11 +46,11 @@ module.exports = ({ pubsub, lightning }) => ({
     },
   },
   Mutation: {
-    addInvoice: async (root, { amount }, { macaroon, headers }) => {
+    addInvoice: async (root, { amount }, { macaroon, createMemo, headers }) => {
       const meta = new grpc.Metadata()
       meta.add('macaroon', macaroon)
       const addInvoice = util.promisify(lightning.addInvoice.bind(lightning))
-      const response = await addInvoice({ value: amount }, meta)
+      const response = await addInvoice({ value: amount, memo: createMemo(amount) }, meta)
       return {
         r_hash: response.r_hash.toString('hex'),
         payment_request: response.payment_request,
