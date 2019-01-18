@@ -172,7 +172,7 @@ app.prepare().then(() => {
     console.info(`Next server listening on ${proto.http}://${listenHost}:${listenPort}`)
     console.info(`GraphQL server listening on ${proto.http}://${listenHost}:${listenPort}/graphql`)
     console.info(`Subscriptions listening on ${proto.ws}://${listenHost}:${listenPort}/graphql`)
-    console.info(`External URL is ${externalProtocol}//${externalHost}${externalPortWithColon}`)
+    console.info(`External URL is ${externalProtocol}//${externalHost}${externalPortWithColon}${basePath}`)
     console.info(`Test API with ${externalProtocol}//${externalHost}${externalPortWithColon}/playground`)
 
     new SubscriptionServer({ execute, subscribe, schema }, {
