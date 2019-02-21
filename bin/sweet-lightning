@@ -15,7 +15,6 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const grpc = require('grpc')
 const { PubSub } = require('graphql-subscriptions')
-const { DefinePlugin, IgnorePlugin } = require('webpack')
 const createResolvers = require('../api/resolvers')
 const { createServer, isSecure } = require('../lib/create-server')
 
