@@ -26,7 +26,7 @@ program
   .option('--lnd.rpcserver [server]', 'Interface/port to lnd\'s RPC services', process.env.LND_RPC_SERVER || 'localhost:10009')
   .option('--tls.certpath [path]', process.env.TLS_CERT_PATH || 'Path to TLS certificate')
   .option('--tls.keypath [path]', process.env.TLS_KEY_PATH || 'Path to TLS key')
-  .option('--listen [server]', 'Interface/port to the web app', process.env.LISTEN || 'localhost:3000')
+  .option('--listen [server]', 'Interface/port to the web app', process.env.PORT ? `0.0.0.0:${process.env.PORT}` : process.env.LISTEN || 'localhost:3000')
   .option('--externalurl [url]', 'External url to the web app', process.env.EXTERNAL_URL || 'http://localhost:3000')
   .option('--footer [text]', 'Footer text', process.env.FOOTER || 'the.lightning.land')
   .option('--footer.url [url]', 'Footer url', process.env.FOOTER_URL || 'https://the.lightning.land')
