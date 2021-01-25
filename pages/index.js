@@ -18,7 +18,7 @@ const max = (value, max) => value > max ? max : value
 class IndexPage extends Component {
   unsubscribe = null
   state = {
-    size: 4,
+    size: 2,
   }
 
   static getInitialProps({ query }) {
@@ -93,7 +93,7 @@ class IndexPage extends Component {
 
   onReturn = () => {
     this.setState({
-      size: 4,
+      size: 2,
     })
 
     const { publicRuntimeConfig } = getConfig()
