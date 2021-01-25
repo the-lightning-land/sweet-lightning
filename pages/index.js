@@ -196,7 +196,7 @@ class IndexPage extends Component {
             <div className="value">
               <div className="sat">{this.state.size * 33} sat</div>
               <div className="usd">
-                <span>CHF</span>
+                <span>CHF </span>
                 {(this.state.size * 0.01).toFixed(2)}
               </div>
             </div>
