@@ -80,7 +80,7 @@ class IndexPage extends Component {
         }
       `,
       variables: {
-        amount: this.state.size * 650,
+        amount: this.state.size * 33,
       },
     })
 
@@ -194,10 +194,10 @@ class IndexPage extends Component {
               <span>Less candy</span>
             </button>
             <div className="value">
-              <div className="sat">{this.state.size * 650} sat</div>
+              <div className="sat">{this.state.size * 33} sat</div>
               <div className="usd">
-                <span>$</span>
-                {(this.state.size * 0.05).toFixed(2)}
+                <span>CHF</span>
+                {(this.state.size * 0.01).toFixed(2)}
               </div>
             </div>
             <button className="more" onClick={this.onMore} disabled={this.state.size >= 6}>
