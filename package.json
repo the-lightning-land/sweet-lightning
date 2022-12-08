@@ -25,7 +25,7 @@
     "body-parser": "^1.18.2",
     "commander": "^2.15.1",
     "cors": "^2.8.4",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "graphql": "^0.13.2",
     "graphql-playground-middleware-express": "^1.6.1",
     "graphql-subscriptions": "^0.5.8",
